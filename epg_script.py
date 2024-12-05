@@ -44,7 +44,7 @@ def create_new_xml(filtered_events, output_file):
     tree.write(output_file)
 
 # 5. URL de l'EPG et chaînes à inclure
-EPG_URL = "URL_DE_TON_FICHIER_XML_COMPRESSÉ"  # Remplace par l'URL de ton fichier .zip
+EPG_URL = "https://xmltvfr.fr/xmltv/xmltv.zip"  # Remplace par l'URL de ton fichier .zip
 CHANNELS_TO_INCLUDE = ["chaine1", "chaine2", "chaine3"]  # Remplace par les identifiants des chaînes qui t'intéressent
 
 # 6. Télécharger, extraire, filtrer et enregistrer
