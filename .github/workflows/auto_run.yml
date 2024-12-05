@@ -1,0 +1,27 @@
+name: Run EPG Scraper Daily
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Exécution tous les jours à minuit (UTC)
+  workflow_dispatch:  # Permet d'exécuter manuellement le workflow si nécessaire
+
+jobs:
+  run_epg_scraper:
+    runs-on: ubuntu-latest  # Utilisation d'une machine virtuelle Ubuntu
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'  # Installe Python 3
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt  # Installe les dépendances
+
+    - name: Run the EPG scraper script
+      run: |
+        python epg_script.py  # Exécute ton script
