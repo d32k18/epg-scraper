@@ -85,7 +85,23 @@ def create_new_xml(filtered_events, output_file):
     
     # Créer un nouvel élément racine <tv>
     root = ET.Element("tv")
+    
+    # Pour garantir que la structure soit correcte, nous devons ajouter les éléments <channel>
+    # avant d'ajouter les programmes filtrés.
 
+    # Ajouter les chaînes correspondantes
+    for channel in root.findall(".//channel"):
+        channel_id = channel.get("id")
+        if channel_id in CHANNELS_TO_INCLUDE:
+            new_channel = ET.Element("channel", id=channel_id)
+            display_name = channel.find("display-name")
+            if display_name is not None:
+                new_channel.append(display_name)
+            icon = channel.find("icon")
+            if icon is not None:
+                new_channel.append(icon)
+            root.append(new_channel)
+    
     # Ajouter chaque programme filtré au fichier XML
     for event in filtered_events:
         # Pour chaque programme filtré, on crée un nouvel élément programme avec ses sous-éléments
