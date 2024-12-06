@@ -36,4 +36,4 @@ jobs:
       run: |
         git push origin main  # Pousse les changements sur la branche main
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Utilise le token GitHub automatique pour pousser
+        TOKEN: ${{ secrets.TOKEN }}  # Utilise le token GitHub secret
