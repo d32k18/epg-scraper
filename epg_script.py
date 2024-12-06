@@ -57,7 +57,7 @@ def create_new_xml(filtered_events, output_file):
 
 # 5. URL de l'EPG et chaînes à inclure
 EPG_URL = "https://xmltvfr.fr/xmltv/xmltv.zip"  # Remplace par l'URL de ton fichier .zip
-CHANNELS_TO_INCLUDE = ["chaine1", "chaine2", "chaine3"]  # Remplace par les identifiants des chaînes qui t'intéressent
+CHANNELS_TO_INCLUDE = ["LaUne.be", "LaDeux.be", "LaTrois.be", "LN24.be", "RadioContact.be", "BelRTL.be", "RTLTVI.be", "ClubRTL.be", "PlugRTL.be", "BX1.be", "ClubbingTV.fr", "TF1.fr", "TF1SeriesFilms.fr", "TMC.fr", "NT1.fr", "NRJ12.fr", "M6.fr", "W9.fr", "6ter.fr", "Gulli.fr"]  # Remplace par les identifiants des chaînes qui t'intéressent
 
 # 6. Télécharger, extraire, filtrer et enregistrer
 def main():
