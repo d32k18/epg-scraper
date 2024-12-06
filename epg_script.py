@@ -6,7 +6,7 @@ import requests
 # URL du fichier ZIP contenant l'EPG
 EPG_URL = "https://xmltvfr.fr/xmltv/xmltv.zip"
 
-# Liste des chaînes à filtrer (ajoute les chaînes que tu veux inclure)
+# Liste des chaînes à filtrer (ajoute les chaînes que tu veux inclure, par exemple '6ter.fr')
 CHANNELS_TO_INCLUDE = ["LaUne.be", "LaDeux.be", "LaTrois.be", "LN24.be", "RadioContact.be", "BelRTL.be", "RTLTVI.be", "ClubRTL.be", "PlugRTL.be", "BX1.be", "ClubbingTV.fr", "TF1.fr", "TF1SeriesFilms.fr", "TMC.fr", "NT1.fr", "NRJ12.fr", "M6.fr", "W9.fr", "6ter.fr", "Gulli.fr"]  # Remplace par les identifiants des chaînes qui t'intéressent
 
 
@@ -37,7 +37,7 @@ def download_and_extract_zip(url, output_dir="epg_data"):
             return xml_path
     raise FileNotFoundError("Aucun fichier XML trouvé dans l'archive ZIP.")
 
-# Fonction pour filtrer les chaînes du fichier XML
+# Fonction pour filtrer les chaînes et les programmes
 def filter_channels(xml_file, channels_to_include):
     print("Filtrage des chaînes en cours...")
     tree = ET.parse(xml_file)
@@ -49,14 +49,15 @@ def filter_channels(xml_file, channels_to_include):
     print("Chaînes disponibles dans le fichier XML :")
     for channel in root.findall(".//channel"):
         channel_id = channel.get("id")
-        print(f"Chaîne trouvée : {channel_id}")
+        print(f"Chaîne trouvée : {channel_id}")  # Affiche l'ID de chaque chaîne
 
     # Filtrer les programmes en fonction des chaînes désirées
     for channel in root.findall(".//channel"):
         channel_id = channel.get("id")
         if channel_id in channels_to_include:
             print(f"Chaîne incluse : {channel_id}")
-            for programme in channel.findall(".//programme"):
+            # Trouver tous les programmes associés à cette chaîne
+            for programme in root.findall(f".//programme[@channel='{channel_id}']"):
                 filtered_events.append(programme)
     
     print(f"Nombre d'événements filtrés : {len(filtered_events)}")
