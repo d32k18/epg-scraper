@@ -8,6 +8,7 @@ on:
 jobs:
   run_epg_scraper:
     runs-on: ubuntu-latest  # Utilisation d'une machine virtuelle Ubuntu
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -22,6 +23,17 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt  # Installe les dépendances
 
+    - name: Configure Git
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+
     - name: Run the EPG scraper script
       run: |
         python epg_script.py  # Exécute ton script
+
+    - name: Push changes to GitHub
+      run: |
+        git push origin main  # Pousse les changements sur la branche main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Utilise le token GitHub automatique pour pousser
