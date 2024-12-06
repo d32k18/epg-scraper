@@ -86,37 +86,28 @@ def create_new_xml(filtered_events, output_file):
     # Créer un nouvel élément racine <tv>
     root = ET.Element("tv")
     
-    # Pour garantir que la structure soit correcte, nous devons ajouter les éléments <channel>
-    # avant d'ajouter les programmes filtrés.
-
-    # Ajouter les chaînes correspondantes
-    for channel in root.findall(".//channel"):
-        channel_id = channel.get("id")
-        if channel_id in CHANNELS_TO_INCLUDE:
-            new_channel = ET.Element("channel", id=channel_id)
-            display_name = channel.find("display-name")
-            if display_name is not None:
-                new_channel.append(display_name)
-            icon = channel.find("icon")
-            if icon is not None:
-                new_channel.append(icon)
-            root.append(new_channel)
-    
-    # Ajouter chaque programme filtré au fichier XML
+    # Ajouter les chaînes filtrées et les programmes
     for event in filtered_events:
-        # Pour chaque programme filtré, on crée un nouvel élément programme avec ses sous-éléments
-        programme = ET.Element("programme")
-        programme.attrib = event.attrib  # Ajout des attributs du programme (comme 'start', 'stop', etc.)
+        channel_id = event.get("channel")
         
-        # Copier les enfants (sous-éléments comme <title>, <desc>, etc.) dans le programme
+        # Créer un élément <channel> pour chaque chaîne filtrée
+        channel_element = ET.Element("channel", id=channel_id)
+        
+        # Ajouter le canal à la racine <tv>
+        root.append(channel_element)
+        
+        # Copier tous les sous-éléments du programme dans un nouvel élément programme
+        programme = ET.Element("programme")
+        programme.attrib = event.attrib
+        
         for child in event:
             child_copy = ET.Element(child.tag, child.attrib)
             child_copy.text = child.text
             programme.append(child_copy)
         
-        # Ajouter le programme dans l'élément racine <tv>
+        # Ajouter le programme à la racine
         root.append(programme)
-    
+
     # Créer l'arbre XML
     tree = ET.ElementTree(root)
     
