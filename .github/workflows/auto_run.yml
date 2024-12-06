@@ -34,6 +34,5 @@ jobs:
 
     - name: Push changes to GitHub
       run: |
+        git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/d32k18/epg-scraper.git
         git push origin main  # Pousse les changements sur la branche main
-      env:
-        TOKEN: ${{ secrets.TOKEN }}  # Utilise le token GitHub secret
