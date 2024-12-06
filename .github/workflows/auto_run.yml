@@ -5,6 +5,9 @@ on:
     - cron: "0 0 * * *"  # Exécution tous les jours à minuit UTC
   workflow_dispatch:  # Exécution manuelle
 
+permissions:
+  contents: write  # Permet d'effectuer un push sur le dépôt
+
 jobs:
   upload_file:
     runs-on: ubuntu-latest
