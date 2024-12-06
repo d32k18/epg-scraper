@@ -5,6 +5,9 @@ on:
     - cron: '0 0 * * *'  # Exécution tous les jours à minuit (UTC)
   workflow_dispatch:  # Permet d'exécuter manuellement le workflow si nécessaire
 
+permissions:
+  contents: write  # Permet de pousser des modifications sur le dépôt
+
 jobs:
   run_epg_scraper:
     runs-on: ubuntu-latest  # Utilisation d'une machine virtuelle Ubuntu
@@ -34,5 +37,4 @@ jobs:
 
     - name: Push changes to GitHub
       run: |
-        git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/d32k18/epg-scraper.git
         git push origin main  # Pousse les changements sur la branche main
