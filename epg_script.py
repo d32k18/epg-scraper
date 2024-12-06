@@ -72,6 +72,7 @@ def filter_channels(xml_file, channels_to_include):
 # Fonction pour créer un nouveau fichier XML filtré
 def create_new_xml(filtered_events, output_file):
     print(f"Création du fichier XML filtré : {output_file}...")
+    
     if filtered_events:
         print(f"Nombre d'événements à écrire : {len(filtered_events)}")
     else:
@@ -79,13 +80,27 @@ def create_new_xml(filtered_events, output_file):
     
     # Créer un nouvel élément racine <tv>
     root = ET.Element("tv")
-    
+
     # Ajouter chaque programme filtré au fichier XML
     for event in filtered_events:
-        root.append(event)
+        # Pour chaque programme filtré, on ajoute les sous-éléments (titre, description, etc.) dans l'élément <programme>
+        # Cela garantit qu'on a bien un programme complet dans le fichier XML
+        programme = ET.Element("programme")
+        programme.attrib = event.attrib
+        
+        for child in event:
+            child_copy = ET.Element(child.tag, child.attrib)
+            child_copy.text = child.text
+            programme.append(child_copy)
+
+        # Ajouter le programme dans l'élément racine <tv>
+        root.append(programme)
     
+    # Créer l'arbre XML
     tree = ET.ElementTree(root)
-    tree.write(output_file)
+    
+    # Sauvegarder le fichier XML
+    tree.write(output_file, encoding="utf-8", xml_declaration=True)
     
     print(f"Fichier XML créé avec succès sous le nom '{output_file}'.")
 
