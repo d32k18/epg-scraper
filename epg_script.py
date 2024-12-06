@@ -88,30 +88,35 @@ def create_new_xml(filtered_events, output_file):
     
     # Ajouter les chaînes filtrées et les programmes
     for event in filtered_events:
+        # Récupérer l'ID de la chaîne
         channel_id = event.get("channel")
         
-        # Créer un élément <channel> pour chaque chaîne filtrée
+        # Ajouter l'élément <channel> correspondant dans la racine <tv>
         channel_element = ET.Element("channel", id=channel_id)
+        display_name = event.find("display-name")
+        icon = event.find("icon")
         
-        # Ajouter le canal à la racine <tv>
+        if display_name is not None:
+            channel_element.append(display_name)
+        if icon is not None:
+            channel_element.append(icon)
+        
         root.append(channel_element)
         
-        # Copier tous les sous-éléments du programme dans un nouvel élément programme
+        # Créer un élément <programme> pour chaque programme filtré
         programme = ET.Element("programme")
-        programme.attrib = event.attrib
-        
+        programme.attrib = event.attrib  # Inclure les attributs du programme (start, stop, etc.)
+
+        # Copier tous les sous-éléments du programme (title, desc, etc.)
         for child in event:
             child_copy = ET.Element(child.tag, child.attrib)
             child_copy.text = child.text
             programme.append(child_copy)
-        
-        # Ajouter le programme à la racine
-        root.append(programme)
 
-    # Créer l'arbre XML
-    tree = ET.ElementTree(root)
+        root.append(programme)
     
-    # Sauvegarder le fichier XML
+    # Créer l'arbre XML et l'écrire dans un fichier
+    tree = ET.ElementTree(root)
     tree.write(output_file, encoding="utf-8", xml_declaration=True)
     
     print(f"Fichier XML créé avec succès sous le nom '{output_file}'.")
