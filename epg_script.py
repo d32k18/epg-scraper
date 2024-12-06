@@ -3,6 +3,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 import requests
 from io import BytesIO
+import subprocess
 
 # 1. Télécharger le fichier ZIP de l'EPG depuis l'URL
 def download_zip(epg_url):
@@ -55,11 +56,19 @@ def create_new_xml(filtered_events, output_file):
     
     print(f"Fichier XML créé avec succès sous le nom '{output_file}'.")
 
-# 5. URL de l'EPG et chaînes à inclure
+# 5. Ajouter les fichiers générés à Git, commettre et pousser
+def commit_and_push_files():
+    print("Ajout des fichiers générés à Git...")
+    subprocess.run(["git", "add", "epg_file.zip", "filtered_epg.xml"], check=True)
+    subprocess.run(["git", "commit", "-m", "Ajout du fichier ZIP et du fichier XML filtré"], check=True)
+    subprocess.run(["git", "push", "origin", "main"], check=True)
+    print("Fichiers ajoutés, commités et poussés avec succès sur GitHub.")
+
+# 6. URL de l'EPG et chaînes à inclure
 EPG_URL = "https://xmltvfr.fr/xmltv/xmltv.zip"  # Remplace par l'URL de ton fichier .zip
 CHANNELS_TO_INCLUDE = ["LaUne.be", "LaDeux.be", "LaTrois.be", "LN24.be", "RadioContact.be", "BelRTL.be", "RTLTVI.be", "ClubRTL.be", "PlugRTL.be", "BX1.be", "ClubbingTV.fr", "TF1.fr", "TF1SeriesFilms.fr", "TMC.fr", "NT1.fr", "NRJ12.fr", "M6.fr", "W9.fr", "6ter.fr", "Gulli.fr"]  # Remplace par les identifiants des chaînes qui t'intéressent
 
-# 6. Télécharger, extraire, filtrer et enregistrer
+# 7. Télécharger, extraire, filtrer et enregistrer
 def main():
     print("Début de l'exécution du script...")
     try:
@@ -72,6 +81,9 @@ def main():
         
         create_new_xml(filtered_events, "filtered_epg.xml")
         print("Script terminé avec succès.")
+        
+        # Ajouter les fichiers générés à Git et pousser
+        commit_and_push_files()
         
     except Exception as e:
         print(f"Une erreur est survenue : {e}")
