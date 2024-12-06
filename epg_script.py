@@ -48,9 +48,14 @@ def filter_channels(xml_file, channels_to_include):
 
     # Affichage des chaînes disponibles dans le XML pour vérifier si celles que tu cherches existent
     print("Chaînes disponibles dans le fichier XML :")
+    channels_found = set()
     for channel in root.findall(".//channel"):
         channel_id = channel.get("id")
+        channels_found.add(channel_id)
         print(f"Chaîne trouvée : {channel_id}")  # Affiche l'ID de chaque chaîne
+
+    print(f"Chaînes trouvées dans le fichier : {channels_found}")
+    print(f"Chaînes demandées : {channels_to_include}")
 
     # Filtrer les programmes en fonction des chaînes désirées
     for channel in root.findall(".//channel"):
