@@ -31,6 +31,4 @@ jobs:
           git config --global user.name "Your Name"
           git add filtered_epg.xml
           git commit -m "Update filtered EPG"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/d32k18/epg-scraper.git
