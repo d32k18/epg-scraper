@@ -6,9 +6,10 @@ import requests
 # URL du fichier ZIP contenant l'EPG
 EPG_URL = "https://xmltvfr.fr/xmltv/xmltv.zip"
 
-# Liste des chaînes à filtrer (ajoute les chaînes que tu veux inclure, par exemple '6ter.fr')
-CHANNELS_TO_INCLUDE = ["LaUne.be", "LaDeux.be", "LaTrois.be", "LN24.be", "RadioContact.be", "BelRTL.be", "RTLTVI.be", "ClubRTL.be", "PlugRTL.be", "BX1.be", "ClubbingTV.fr", "TF1.fr", "TF1SeriesFilms.fr", "TMC.fr", "NT1.fr", "NRJ12.fr", "M6.fr", "W9.fr", "6ter.fr", "Gulli.fr"]  # Remplace par les identifiants des chaînes qui t'intéressent
-
+# Liste des chaînes à filtrer (ajoute les chaînes que tu veux inclure)
+CHANNELS_TO_INCLUDE = ["6ter.fr", "BX1.be", "BelRTL.be", "ClubRTL.be", "ClubbingTV.fr", "Gulli.fr", "LN24.be", 
+                       "LaDeux.be", "LaTrois.be", "LaUne.be", "M6.fr", "NRJ12.fr", "NT1.fr", "PlugRTL.be", 
+                       "RTLTVI.be", "RadioContact.be", "TF1.fr", "TF1SeriesFilms.fr", "TMC.fr", "W9.fr"]
 
 # Fonction pour télécharger et extraire le fichier XML depuis un fichier ZIP
 def download_and_extract_zip(url, output_dir="epg_data"):
@@ -44,7 +45,7 @@ def filter_channels(xml_file, channels_to_include):
     root = tree.getroot()
 
     filtered_events = []
-    
+
     # Affichage des chaînes disponibles dans le XML pour vérifier si celles que tu cherches existent
     print("Chaînes disponibles dans le fichier XML :")
     for channel in root.findall(".//channel"):
@@ -56,10 +57,15 @@ def filter_channels(xml_file, channels_to_include):
         channel_id = channel.get("id")
         if channel_id in channels_to_include:
             print(f"Chaîne incluse : {channel_id}")
+            
             # Trouver tous les programmes associés à cette chaîne
             for programme in root.findall(f".//programme[@channel='{channel_id}']"):
+                # Ajout du programme à la liste des événements filtrés
                 filtered_events.append(programme)
-    
+                
+                # Débogage pour vérifier qu'un programme a été bien ajouté
+                print(f"Programme ajouté pour {channel_id}: {programme.find('title').text if programme.find('title') is not None else 'Pas de titre'}")
+
     print(f"Nombre d'événements filtrés : {len(filtered_events)}")
     return filtered_events
 
@@ -71,7 +77,10 @@ def create_new_xml(filtered_events, output_file):
     else:
         print("Aucun événement à écrire.")
     
+    # Créer un nouvel élément racine <tv>
     root = ET.Element("tv")
+    
+    # Ajouter chaque programme filtré au fichier XML
     for event in filtered_events:
         root.append(event)
     
