@@ -83,16 +83,16 @@ def create_new_xml(filtered_events, output_file):
 
     # Ajouter chaque programme filtré au fichier XML
     for event in filtered_events:
-        # Pour chaque programme filtré, on ajoute les sous-éléments (titre, description, etc.) dans l'élément <programme>
-        # Cela garantit qu'on a bien un programme complet dans le fichier XML
+        # Pour chaque programme filtré, on crée un nouvel élément programme avec ses sous-éléments
         programme = ET.Element("programme")
-        programme.attrib = event.attrib
+        programme.attrib = event.attrib  # Ajout des attributs du programme (comme 'start', 'stop', etc.)
         
+        # Copier les enfants (sous-éléments comme <title>, <desc>, etc.) dans le programme
         for child in event:
             child_copy = ET.Element(child.tag, child.attrib)
             child_copy.text = child.text
             programme.append(child_copy)
-
+        
         # Ajouter le programme dans l'élément racine <tv>
         root.append(programme)
     
