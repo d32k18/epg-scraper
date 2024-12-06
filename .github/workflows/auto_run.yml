@@ -1,40 +1,36 @@
-name: Run EPG Scraper Daily
+name: Upload filtered XML to GitHub
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Exécution tous les jours à minuit (UTC)
-  workflow_dispatch:  # Permet d'exécuter manuellement le workflow si nécessaire
-
-permissions:
-  contents: write  # Permet de pousser des modifications sur le dépôt
+    - cron: "0 0 * * *"  # Exécution tous les jours à minuit UTC
+  workflow_dispatch:  # Exécution manuelle
 
 jobs:
-  run_epg_scraper:
-    runs-on: ubuntu-latest  # Utilisation d'une machine virtuelle Ubuntu
-
+  upload_file:
+    runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'  # Installe Python 3
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.x'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt  # Installe les dépendances
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
 
-    - name: Configure Git
-      run: |
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
+      - name: Run the EPG script
+        run: python3 epg_script.py  # Assure-toi que le script s'appelle epg_script.py
 
-    - name: Run the EPG scraper script
-      run: |
-        python epg_script.py  # Exécute ton script
-
-    - name: Push changes to GitHub
-      run: |
-        git push origin main  # Pousse les changements sur la branche main
+      - name: Commit and push the changes
+        run: |
+          git config --global user.email "youremail@example.com"
+          git config --global user.name "Your Name"
+          git add filtered_epg.xml
+          git commit -m "Update filtered EPG"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
