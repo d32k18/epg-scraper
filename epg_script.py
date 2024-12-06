@@ -6,12 +6,15 @@ import requests
 # URL du fichier ZIP contenant l'EPG
 EPG_URL = "https://xmltvfr.fr/xmltv/xmltv.zip"
 
-# Liste des chaînes à filtrer (ajoute les chaînes que tu veux inclure)
-CHANNELS_TO_INCLUDE = ["6ter.fr", "BX1.be", "BelRTL.be", "ClubRTL.be", "ClubbingTV.fr", "Gulli.fr", "LN24.be", 
-                       "LaDeux.be", "LaTrois.be", "LaUne.be", "M6.fr", "NRJ12.fr", "NT1.fr", "PlugRTL.be", 
-                       "RTLTVI.be", "RadioContact.be", "TF1.fr", "TF1SeriesFilms.fr", "TMC.fr", "W9.fr"]
+# Liste des chaînes à filtrer
+CHANNELS_TO_INCLUDE = [
+    "6ter.fr", "BX1.be", "BelRTL.be", "ClubRTL.be", "ClubbingTV.fr", 
+    "Gulli.fr", "LN24.be", "LaDeux.be", "LaTrois.be", "LaUne.be", 
+    "M6.fr", "NRJ12.fr", "NT1.fr", "PlugRTL.be", "RTLTVI.be", 
+    "RadioContact.be", "TF1.fr", "TF1SeriesFilms.fr", "TMC.fr", "W9.fr"
+]
 
-# Fonction pour télécharger et extraire le fichier XML depuis un fichier ZIP
+# Fonction pour télécharger et extraire le fichier ZIP
 def download_and_extract_zip(url, output_dir="epg_data"):
     print("Téléchargement du fichier ZIP...")
     response = requests.get(url)
@@ -46,18 +49,7 @@ def filter_channels(xml_file, channels_to_include):
 
     filtered_events = []
 
-    # Affichage des chaînes disponibles dans le XML pour vérifier si celles que tu cherches existent
-    print("Chaînes disponibles dans le fichier XML :")
-    channels_found = set()
-    for channel in root.findall(".//channel"):
-        channel_id = channel.get("id")
-        channels_found.add(channel_id)
-        print(f"Chaîne trouvée : {channel_id}")  # Affiche l'ID de chaque chaîne
-
-    print(f"Chaînes trouvées dans le fichier : {channels_found}")
-    print(f"Chaînes demandées : {channels_to_include}")
-
-    # Filtrer les programmes en fonction des chaînes désirées
+    # Filtrer les programmes en fonction des chaînes demandées
     for channel in root.findall(".//channel"):
         channel_id = channel.get("id")
         if channel_id in channels_to_include:
@@ -65,57 +57,46 @@ def filter_channels(xml_file, channels_to_include):
             
             # Trouver tous les programmes associés à cette chaîne
             for programme in root.findall(f".//programme[@channel='{channel_id}']"):
-                # Ajout du programme à la liste des événements filtrés
                 filtered_events.append(programme)
-                
-                # Débogage pour vérifier qu'un programme a été bien ajouté
-                print(f"Programme ajouté pour {channel_id}: {programme.find('title').text if programme.find('title') is not None else 'Pas de titre'}")
 
     print(f"Nombre d'événements filtrés : {len(filtered_events)}")
     return filtered_events
 
-# Fonction pour créer un nouveau fichier XML filtré
+# Fonction pour créer un fichier XML filtré
 def create_new_xml(filtered_events, output_file):
     print(f"Création du fichier XML filtré : {output_file}...")
-    
-    if filtered_events:
-        print(f"Nombre d'événements à écrire : {len(filtered_events)}")
-    else:
-        print("Aucun événement à écrire.")
     
     # Créer un nouvel élément racine <tv>
     root = ET.Element("tv")
     
     # Ajouter les chaînes filtrées et les programmes
     for event in filtered_events:
-        # Récupérer l'ID de la chaîne
+        # Créer l'élément <channel> pour chaque programme
         channel_id = event.get("channel")
-        
-        # Ajouter l'élément <channel> correspondant dans la racine <tv>
         channel_element = ET.Element("channel", id=channel_id)
-        display_name = event.find("display-name")
-        icon = event.find("icon")
-        
-        if display_name is not None:
-            channel_element.append(display_name)
-        if icon is not None:
-            channel_element.append(icon)
-        
-        root.append(channel_element)
-        
-        # Créer un élément <programme> pour chaque programme filtré
-        programme = ET.Element("programme")
-        programme.attrib = event.attrib  # Inclure les attributs du programme (start, stop, etc.)
 
-        # Copier tous les sous-éléments du programme (title, desc, etc.)
+        # Ajouter les informations de la chaîne (display-name, icon, etc.)
+        channel = next((ch for ch in root.findall(".//channel") if ch.get("id") == channel_id), None)
+        if channel is not None:
+            display_name = channel.find("display-name")
+            icon = channel.find("icon")
+            if display_name is not None:
+                channel_element.append(display_name)
+            if icon is not None:
+                channel_element.append(icon)
+
+        # Ajouter les programmes au fichier XML
+        programme = ET.Element("programme")
+        programme.attrib = event.attrib  # Inclure les attributs (start, stop, etc.)
+
         for child in event:
             child_copy = ET.Element(child.tag, child.attrib)
             child_copy.text = child.text
             programme.append(child_copy)
 
         root.append(programme)
-    
-    # Créer l'arbre XML et l'écrire dans un fichier
+
+    # Créer l'arbre XML et l'écrire dans le fichier
     tree = ET.ElementTree(root)
     tree.write(output_file, encoding="utf-8", xml_declaration=True)
     
