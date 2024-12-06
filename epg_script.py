@@ -2,38 +2,56 @@ import os
 import zipfile
 import xml.etree.ElementTree as ET
 import requests
-from io import BytesIO
-import subprocess
 
-# 1. Télécharger le fichier ZIP de l'EPG depuis l'URL
-def download_zip(epg_url):
-    print("Téléchargement du fichier ZIP en cours...")
-    response = requests.get(epg_url)
-    response.raise_for_status()  # Lancer une exception si l'URL échoue
+# URL du fichier ZIP contenant l'EPG
+EPG_URL = "https://xmltvfr.fr/xmltv/xmltv.zip"
+
+# Liste des chaînes à filtrer (ajoute les chaînes que tu veux inclure)
+CHANNELS_TO_INCLUDE = ["LaUne.be", "LaDeux.be", "LaTrois.be", "LN24.be", "RadioContact.be", "BelRTL.be", "RTLTVI.be", "ClubRTL.be", "PlugRTL.be", "BX1.be", "ClubbingTV.fr", "TF1.fr", "TF1SeriesFilms.fr", "TMC.fr", "NT1.fr", "NRJ12.fr", "M6.fr", "W9.fr", "6ter.fr", "Gulli.fr"]  # Remplace par les identifiants des chaînes qui t'intéressent
+
+
+# Fonction pour télécharger et extraire le fichier XML depuis un fichier ZIP
+def download_and_extract_zip(url, output_dir="epg_data"):
+    print("Téléchargement du fichier ZIP...")
+    response = requests.get(url)
+    zip_filename = "epg_file.zip"
     
-    # Sauvegarde le fichier ZIP localement pour pouvoir le vérifier
-    with open('epg_file.zip', 'wb') as f:
-        f.write(response.content)
-    print("Fichier ZIP téléchargé sous le nom 'epg_file.zip'.")
-    return zipfile.ZipFile(BytesIO(response.content))
-
-# 2. Extraire le fichier XML à partir du ZIP
-def extract_xml(zip_file):
-    print("Extraction du fichier XML...")
-    for file_name in zip_file.namelist():
+    with open(zip_filename, "wb") as file:
+        file.write(response.content)
+    
+    print(f"Fichier ZIP téléchargé : {zip_filename}")
+    
+    # Extraction du fichier ZIP
+    print(f"Extraction du fichier ZIP dans le répertoire {output_dir}...")
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    
+    with zipfile.ZipFile(zip_filename, "r") as zip_ref:
+        zip_ref.extractall(output_dir)
+    
+    # Vérification de l'existence du fichier XML
+    for file_name in os.listdir(output_dir):
         if file_name.endswith(".xml"):
-            print(f"Fichier XML trouvé : {file_name}")  # Affiche le nom du fichier XML
-            return zip_file.open(file_name)
-    raise FileNotFoundError("Aucun fichier XML trouvé dans l'archive.")
+            xml_path = os.path.join(output_dir, file_name)
+            print(f"Fichier XML trouvé : {xml_path}")
+            return xml_path
+    raise FileNotFoundError("Aucun fichier XML trouvé dans l'archive ZIP.")
 
-# 3. Filtrer les chaînes d'intérêt
+# Fonction pour filtrer les chaînes du fichier XML
 def filter_channels(xml_file, channels_to_include):
     print("Filtrage des chaînes en cours...")
     tree = ET.parse(xml_file)
     root = tree.getroot()
 
-    # Filtrer les programmes en fonction des chaînes désirées
     filtered_events = []
+    
+    # Affichage des chaînes disponibles dans le XML pour vérifier si celles que tu cherches existent
+    print("Chaînes disponibles dans le fichier XML :")
+    for channel in root.findall(".//channel"):
+        channel_id = channel.get("id")
+        print(f"Chaîne trouvée : {channel_id}")
+
+    # Filtrer les programmes en fonction des chaînes désirées
     for channel in root.findall(".//channel"):
         channel_id = channel.get("id")
         if channel_id in channels_to_include:
@@ -44,9 +62,14 @@ def filter_channels(xml_file, channels_to_include):
     print(f"Nombre d'événements filtrés : {len(filtered_events)}")
     return filtered_events
 
-# 4. Créer un nouveau fichier XML avec les chaînes filtrées
+# Fonction pour créer un nouveau fichier XML filtré
 def create_new_xml(filtered_events, output_file):
     print(f"Création du fichier XML filtré : {output_file}...")
+    if filtered_events:
+        print(f"Nombre d'événements à écrire : {len(filtered_events)}")
+    else:
+        print("Aucun événement à écrire.")
+    
     root = ET.Element("tv")
     for event in filtered_events:
         root.append(event)
@@ -56,37 +79,20 @@ def create_new_xml(filtered_events, output_file):
     
     print(f"Fichier XML créé avec succès sous le nom '{output_file}'.")
 
-# 5. Ajouter les fichiers générés à Git, commettre et pousser
-def commit_and_push_files():
-    print("Ajout des fichiers générés à Git...")
-    subprocess.run(["git", "add", "epg_file.zip", "filtered_epg.xml"], check=True)
-    subprocess.run(["git", "commit", "-m", "Ajout du fichier ZIP et du fichier XML filtré"], check=True)
-    subprocess.run(["git", "push", "origin", "main"], check=True)
-    print("Fichiers ajoutés, commités et poussés avec succès sur GitHub.")
-
-# 6. URL de l'EPG et chaînes à inclure
-EPG_URL = "https://xmltvfr.fr/xmltv/xmltv.zip"  # Remplace par l'URL de ton fichier .zip
-CHANNELS_TO_INCLUDE = ["LaUne.be", "LaDeux.be", "LaTrois.be", "LN24.be", "RadioContact.be", "BelRTL.be", "RTLTVI.be", "ClubRTL.be", "PlugRTL.be", "BX1.be", "ClubbingTV.fr", "TF1.fr", "TF1SeriesFilms.fr", "TMC.fr", "NT1.fr", "NRJ12.fr", "M6.fr", "W9.fr", "6ter.fr", "Gulli.fr"]  # Remplace par les identifiants des chaînes qui t'intéressent
-
-# 7. Télécharger, extraire, filtrer et enregistrer
+# Fonction principale pour orchestrer le téléchargement, extraction et filtrage
 def main():
-    print("Début de l'exécution du script...")
     try:
-        zip_file = download_zip(EPG_URL)
-        print("ZIP téléchargé et extrait.")
-        
-        xml_file = extract_xml(zip_file)
-        
+        # Télécharger et extraire le fichier ZIP contenant le XML
+        xml_file = download_and_extract_zip(EPG_URL)
+
+        # Filtrer les chaînes et les événements
         filtered_events = filter_channels(xml_file, CHANNELS_TO_INCLUDE)
-        
+
+        # Créer le fichier XML filtré
         create_new_xml(filtered_events, "filtered_epg.xml")
-        print("Script terminé avec succès.")
-        
-        # Ajouter les fichiers générés à Git et pousser
-        commit_and_push_files()
-        
+    
     except Exception as e:
-        print(f"Une erreur est survenue : {e}")
+        print(f"Une erreur est survenue : {str(e)}")
 
 if __name__ == "__main__":
     main()
