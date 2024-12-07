@@ -8,10 +8,7 @@ EPG_URL = "https://xmltvfr.fr/xmltv/xmltv.zip"
 
 # Liste des chaînes à filtrer
 CHANNELS_TO_INCLUDE = [
-    "6ter.fr", "BX1.be", "BelRTL.be", "ClubRTL.be", "ClubbingTV.fr", 
-    "Gulli.fr", "LN24.be", "LaDeux.be", "LaTrois.be", "LaUne.be", 
-    "M6.fr", "NRJ12.fr", "NT1.fr", "PlugRTL.be", "RTLTVI.be", 
-    "RadioContact.be", "TF1.fr", "TF1SeriesFilms.fr", "TMC.fr", "W9.fr"
+    "RadioContact.be", "LaUne.be", "LaDeux.be", "LaTrois.be", "RTLTVI.be", "ClubRTL.be", "PlugRTL.be", "BelRTL.be", "LN24.be", "BX1.be", "TF1.fr", "TF1SeriesFilms.fr", "France2.fr", "France3.fr", "France4.fr", "France5.fr", "TMC.fr", "NT1.fr", "C8.fr", "CStar.fr", "NRJ12.fr", "M6.fr", "W9.fr", "6ter.fr", "Arte.fr", "Gulli.fr", "ClubbingTV.fr"
 ]
 
 # Fonction pour télécharger et extraire le fichier ZIP
