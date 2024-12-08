@@ -109,7 +109,7 @@ def main():
         filtered_events = filter_channels(xml_file, CHANNELS_TO_INCLUDE)
 
         # Créer le fichier XML filtré
-        create_new_xml(filtered_events, "https://raw.githubusercontent.com/d32k18/Epg/main/filtered_epg.xml")
+        create_new_xml(filtered_events, "filtered_epg.xml")
     
     except Exception as e:
         print(f"Une erreur est survenue : {str(e)}")
